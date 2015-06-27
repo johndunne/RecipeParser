@@ -36,7 +36,7 @@ class RecipeParser_Recipe {
             'credits' => $this->credits,
             'notes' => $this->notes,
             'yield' => $this->yield,
-            'source' => $this-source,
+            'source' => $this->source,
             'url' => $this->url,
             'categories' => $this->categories,
             'photo_url' => $this->photo_url,
