@@ -24,10 +24,10 @@ class RecipeParser_Parser_12tomatoescom {
         }
 
         // Yield
-        $nodes = $xpath->query('//div[@class="post-body"]//p');
+        $nodes = $xpath->query('//span[@itemprop="articleBody"]//p');
         foreach ($nodes as $node) {
             $line = trim($node->nodeValue);
-            if (strpos($line, "Yield") === 0) {
+            if (strpos($line, "Yield") === 0||strpos($line, "Serve") === 0) {
                 $line = RecipeParser_Text::formatYield($line);
                 $recipe->yield = $line;
                 break;
@@ -35,7 +35,7 @@ class RecipeParser_Parser_12tomatoescom {
         }
 
         // Ingredients
-        $nodes = $xpath->query('//div[@class="post-body"]//ul/li');
+        $nodes = $xpath->query('//span[@itemprop="articleBody"]//ul/li');
         foreach ($nodes as $node) {
             $line = $node->nodeValue;
             $line = RecipeParser_Text::formatAsOneLine($line);
@@ -43,7 +43,7 @@ class RecipeParser_Parser_12tomatoescom {
         }
 
         // Instructions
-        $nodes = $xpath->query('//div[@class="post-body"]//ol/li');
+        $nodes = $xpath->query('//span[@itemprop="articleBody"]//ol/li');
         foreach ($nodes as $node) {
             $line = $node->nodeValue;
             $line = RecipeParser_Text::formatAsOneLine($line);
