@@ -12,7 +12,7 @@ class RecipeParser_Parser_Elanaspantrycom {
         $xpath = new DOMXPath($doc);
 
         if (!$recipe->title) {
-            $nodes = $xpath->query('//div[@class="box"]/strong');
+            $nodes = $xpath->query('//div[@itemprop="name"]');
             if ($nodes->length) {
                 $line = $nodes->item(0)->nodeValue;
                 $line = RecipeParser_Text::formatTitle($line);
@@ -33,19 +33,15 @@ class RecipeParser_Parser_Elanaspantrycom {
         }
 
         if (!count($recipe->ingredients[0]["list"])) {
-            $nodes = $xpath->query('//div[@class="box"]');
+            $nodes = $xpath->query('//ul[@class="ingredients"]');
             if ($nodes->length) {
                 $nodes = $nodes->item(0)->childNodes;
 
                 $str = "";
                 foreach ($nodes as $node) {
-                    if (in_array($node->nodeName, array("#text", "a", "br"))) {
-                        if ($node->nodeName == "br") {
-                            $str .= "<br>";
-                        } else {
-                            $line = $node->nodeValue;
-                            $str .= $line;
-                        }
+                    if (in_array($node->nodeName, array("li"))) {
+                        $line = $node->nodeValue;
+                        $str .= $line."<br>";
                     }
                 }
                 $lines = explode("<br>", $str);
@@ -57,7 +53,7 @@ class RecipeParser_Parser_Elanaspantrycom {
         }
 
         if (!count($recipe->instructions[0]["list"])) {
-            $nodes = $xpath->query('//div[@class="box"]/ol/li');
+            $nodes = $xpath->query('//div[@class="instructions"]/ol/li');
             foreach ($nodes as $node) {
                 $line = $node->nodeValue;
                 $line = RecipeParser_Text::formatAsOneLine($line);
