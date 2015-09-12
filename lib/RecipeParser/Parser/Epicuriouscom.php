@@ -14,6 +14,35 @@ class RecipeParser_Parser_Epicuriouscom {
 
 
         // OVERRIDES for epicurious
+        // Prep Times
+        $nodes = $xpath->query('//*[@class="summary_data"]');
+        if ($nodes->length) {
+            foreach ($nodes as $node) {
+                if( preg_match('/ACTIVE/', $node->nodeValue) ){
+                    $ing_nodes = $node->childNodes;
+                    foreach ($ing_nodes as $ing_node) {
+                        if($ing_node->nodeName == "span"){
+                            $recipe->prep_time = RecipeParser_Text::formatAsOneLine($ing_node->nodeValue);
+                        }
+                    }
+                }
+                else if( preg_match('/TOTAL/', $node->nodeValue) ){
+                    $ing_nodes = $node->childNodes;
+                    foreach ($ing_nodes as $ing_node) {
+                        if($ing_node->nodeName == "span"){
+                            $recipe->total_time = RecipeParser_Text::formatAsOneLine($ing_node->nodeValue);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Total Time
+        $nodes = $xpath->query('//*[@itemprop="totalTime"]');
+        if ($nodes->length) {
+            $value = $nodes->item(0)->getAttribute("content");
+            $recipe->time['total'] = RecipeParser_Text::iso8601ToMinutes($value);
+        }
 
         // Ingredients
         $recipe->resetIngredients();

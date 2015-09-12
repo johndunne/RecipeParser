@@ -11,7 +11,7 @@ class RecipeParser_Parser_Seriouseatscom {
         $doc->loadHTML('<?xml encoding="UTF-8">' . $html);
         $xpath = new DOMXPath($doc);
 
-        $hrecipe = $xpath->query('//*[@class="hrecipe"]');
+        $hrecipe = $xpath->query('//section[@role="main"]');
         if ($hrecipe->length) {
             $hrecipe = $hrecipe->item(0);
 
@@ -24,6 +24,12 @@ class RecipeParser_Parser_Seriouseatscom {
 
             // Yield -- Class names are conflated
             $nodes = $xpath->query('.//*[@class="info yield"]', $hrecipe);
+            if ($nodes->length) {
+                $line = $nodes->item(0)->nodeValue;
+                $recipe->yield = RecipeParser_Text::formatYield($line);
+            }
+
+            $nodes = $xpath->query('.//span[@itemprop="recipeYield"]', $hrecipe);
             if ($nodes->length) {
                 $line = $nodes->item(0)->nodeValue;
                 $recipe->yield = RecipeParser_Text::formatYield($line);

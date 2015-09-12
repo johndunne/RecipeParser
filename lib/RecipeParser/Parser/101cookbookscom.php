@@ -60,7 +60,6 @@ class RecipeParser_Parser_101cookbookscom {
             }
         }
         
-
         // Instructions
         $recipe->resetInstructions();
         $lines = array();

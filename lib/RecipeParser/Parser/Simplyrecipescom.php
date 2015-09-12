@@ -13,9 +13,8 @@ class RecipeParser_Parser_Simplyrecipescom {
 
         // Ingredients
         $recipe->resetIngredients();
-        $nodes = $xpath->query('//div[@id = "recipe-ingredients"]/*');
+        $nodes = $xpath->query('//div[@class="entry-details recipe-ingredients"]/*');
         foreach ($nodes as $node) {
-
             if ($node->nodeName == 'p') {
                 $value = trim($node->nodeValue);
 
@@ -43,6 +42,7 @@ class RecipeParser_Parser_Simplyrecipescom {
                     $recipe->addIngredientsSection($value);
                 }
             } else if ($node->nodeName == 'ul') {
+
                 $subnodes = $xpath->query('./li[@class = "ingredient"]', $node);
                 foreach ($subnodes as $subnode) {
                     $value = trim($subnode->nodeValue);

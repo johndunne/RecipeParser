@@ -13,6 +13,21 @@ class RecipeParser_Parser_Bigovencom {
         $doc->loadHTML('<?xml encoding="UTF-8">' . $html);
         $xpath = new DOMXPath($doc);
 
+        // Title
+        $nodes = $xpath->query('//h1[@itemprop="name"]');
+        if ($nodes->length) {
+            $line = RecipeParser_Text::formatAsOneLine($nodes->item(0)->nodeValue);
+            $recipe->title = $line;
+        }
+
+        // Duration
+        $nodes = $xpath->query('//time[@class="value-title"]');
+        foreach ($nodes as $node) {
+            $line = $node->getAttribute("datetime");
+            $recipe->total_time = $line;
+            break;
+        }
+
         // Yield
         $nodes = $xpath->query('//*[@name="resizeTo"]');
         if ($nodes->length) {
@@ -49,6 +64,14 @@ class RecipeParser_Parser_Bigovencom {
             } else {
                 $recipe->appendInstruction($line);
             }
+        }
+
+        // Image
+        $nodes = $xpath->query('//img[@itemprop="photo"]');
+        foreach ($nodes as $node) {
+            $line = $node->getAttribute("src");
+            $recipe->photo_url = $line;
+            break;
         }
 
         return $recipe;
