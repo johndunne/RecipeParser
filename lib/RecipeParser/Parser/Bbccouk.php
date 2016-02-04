@@ -12,20 +12,61 @@ class RecipeParser_Parser_Bbccouk {
         $doc = new DOMDocument();
         $doc->loadHTML('<?xml encoding="UTF-8">' . $html);
         $xpath = new DOMXPath($doc);
+        $recipe->resetIngredients();
+
+        $recipeName = $xpath->query('.//*[@itemprop="name"]');
+        $value = trim($recipeName[0]->nodeValue);
+        $recipe->title = $value;
+
+        $nodes = $xpath->query('//li[@itemprop="recipeInstructions"]/*');
+        if ($nodes->length) {
+            foreach ($nodes as $sub) {
+                $line = trim($sub->nodeValue);
+                $line = RecipeParser_Text::stripLeadingNumbers($line);
+                $recipe->appendInstruction($line);
+            }
+        }
+        $image = $xpath->query('.//*[@itemprop="image"]');
+        $photo_url = $image[0]->getAttribute('src');
+        $recipe->photo_url = RecipeParser_Text::relativeToAbsolute($photo_url, $url);
+
+        // Meta data
+        $nodes = $xpath->query('//div[@class="recipe-metadata-wrap"]/*');
+        if ($nodes->length) {
+            $prepTime = $xpath->query('.//*[@itemprop="prepTime"]');
+            foreach ($prepTime[0]->attributes as $sub) {
+                if($sub->nodeName=="content"){
+                    $value = trim($sub->nodeValue);
+                    $recipe->time['prep'] = RecipeParser_Text::iso8601ToMinutes($value);
+                }
+            }
+            $prepTime = $xpath->query('.//*[@itemprop="cookTime"]');
+            foreach ($prepTime[0]->attributes as $sub) {
+                if($sub->nodeName=="content"){
+                    $value = trim($sub->nodeValue);
+                    $recipe->time['cook'] = RecipeParser_Text::iso8601ToMinutes($value);
+                }
+            }
+            $recipe->time['total'] = $recipe->time['cook']+$recipe->time['prep'];
+
+            $recipeYield = $xpath->query('.//*[@itemprop="recipeYield"]');
+            $value = trim($recipeYield[0]->nodeValue);
+            $recipe->yield = RecipeParser_Text::formatYield($value);
+
+        }
 
         // Multi-stage ingredients
-        $nodes = $xpath->query('//dl[@id="stages"]/*');
+        $nodes = $xpath->query('//div[@class="recipe-ingredients-wrapper"]/*');
         if ($nodes->length) {
-            $recipe->resetIngredients();
 
             foreach ($nodes as $node) {
-                if ($node->nodeName == 'dt') {
+                if ($node->nodeName == 'h3') {
                     $value = $node->nodeValue;
                     $value = RecipeParser_Text::formatSectionName($value);
                     $recipe->addIngredientsSection($value);
                 
-                } else if ($node->nodeName == 'dd') {
-                    $subs = $xpath->query('.//*[@class="ingredient"]', $node);
+                } else if ($node->nodeName == 'ul') {
+                    $subs = $xpath->query('.//li[@itemprop="ingredients"]', $node);
                     foreach ($subs as $sub) {
                         $value = trim($sub->nodeValue);
                         $recipe->appendIngredient($value);
